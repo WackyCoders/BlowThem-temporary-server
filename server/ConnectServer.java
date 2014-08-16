@@ -141,7 +141,7 @@ public class ConnectServer {
         int scores;
         int money;
         
-        protected Float X, Y;
+        protected Float X, Y, bitmapAngle;
         //Queue<Tank> tanks = new LinkedList<Tank>();
         Garage garage = new Garage();
         Battle currentBattle = null;
@@ -472,7 +472,7 @@ public class ConnectServer {
 	                	try{
 	                		this.X = inputStream.readFloat();
 	                		this.Y = inputStream.readFloat();
-	                		//System.out.println("X = " + this.X + " ; Y = " + this.Y);
+	                		this.bitmapAngle = inputStream.readFloat();
 	                		
 	                		//battle.setX(inputStream.readFloat());
 	                		//battle.setY(inputStream.readFloat()); 
