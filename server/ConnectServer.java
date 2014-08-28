@@ -5,6 +5,7 @@ import server.Garage.*;
 import java.io.*;
 import java.net.*;
 import java.sql.ResultSet;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -31,6 +32,15 @@ public class ConnectServer {
 	            if(gameServer.battleUsers.size() == 2 && !gameServer.started){
 	            	gameServer.started = true;
 	            	System.out.println("Battle users == 2");
+	            	try{
+	            		Thread.sleep(3000);
+	            	} catch(InterruptedException e){
+	            		e.printStackTrace();
+	            	}
+	            	for(Map.Entry<Integer, UserProcessor> entry : gameServer.battleUsers.entrySet()){
+	            		entry.getValue().send("$started$");
+	            	}
+	            	
 	            	battle = new Battle(gameServer.battleUsers);
 	            	battle.start();
 	            	battleStarted = true;
@@ -130,6 +140,7 @@ public class ConnectServer {
     class UserProcessor implements Runnable{
         Socket socket;
         private boolean closed = false;
+        protected boolean motioned = false;
         boolean waitingForABattle = false;
 
         DataOutputStream outputStream;
@@ -141,7 +152,9 @@ public class ConnectServer {
         int scores;
         int money;
         
-        protected Float X, Y, bitmapAngle;
+        protected boolean fired = false;
+        protected Float X, Y, bitmapAngle, targetX, targetY;
+        protected Float xFire, yFire;
         //Queue<Tank> tanks = new LinkedList<Tank>();
         Garage garage = new Garage();
         Battle currentBattle = null;
@@ -277,7 +290,7 @@ public class ConnectServer {
             try {
                 userId = dataBaseConnector.checkUser(username, password);
                 gameServer.addUser(userId, this);
-                //send("$login_success$");
+                send("$login_success$");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -314,7 +327,7 @@ public class ConnectServer {
 
             try {
                 dataBaseConnector.addUser(username, password, mail);
-                send("registration_success");
+                send("$registration_success$");
                 login(password);
             } catch (DataBaseConnectorExistException e) {
                 send("$registration_exist$");
@@ -446,6 +459,7 @@ public class ConnectServer {
             enter();
             getUserInformation();
             sendUserInformation();
+            int counter = 1;
 
             if(!closed)System.out.println("We enter to the system");
 
@@ -465,23 +479,36 @@ public class ConnectServer {
                 } else if (line.equals("$start$")){//это начало битвы
                 	System.out.println("We are starting the battle");
                 	gameServer.battleUsers.put(userId, this);
-                	//send("$battle_started$");
+                	if(gameServer.battleUsers.size() == 1){
+                		System.out.println("send $first$");
+                		send("$first$");
+                	} else if(gameServer.battleUsers.size() == 2){
+                		System.out.println("send $second$");
+                		send("$second$");
+                	}
 
                 } else if (line.equals("$motion$")){
-                	//if(battleStarted){
+                	if(battleStarted){
 	                	try{
 	                		this.X = inputStream.readFloat();
 	                		this.Y = inputStream.readFloat();
 	                		this.bitmapAngle = inputStream.readFloat();
-	                		
-	                		//battle.setX(inputStream.readFloat());
-	                		//battle.setY(inputStream.readFloat()); 
+	                		this.targetX = inputStream.readFloat();
+	                		this.targetY = inputStream.readFloat();
 	                		battle.startChannel(this);
 	                	} catch(IOException e){
 	                		e.printStackTrace();
 	                	}
-                	//}
-                } else if(line.equals("$stop$")){ 
+                	}
+                } else if (line.equals("$fire$")){
+                	fired = true;
+                	try{
+                		this.xFire = inputStream.readFloat();
+                		this.yFire = inputStream.readFloat();
+                	} catch(IOException e){
+                		e.printStackTrace();
+                	}
+                }else if(line.equals("$stop$")){ 
                 	try{
                 		battle.join();
                 		battleStarted = false;
@@ -550,7 +577,8 @@ public class ConnectServer {
         public synchronized void close() {
             if(!closed){
                 System.out.println("Умираю :(");
-                battle.removeChannel(this);
+                if(battleStarted)
+                	battle.removeChannel(this);
                 if(userId != null){
                     gameServer.deleteUser(userId, currentBattle);
                     userId = null;
