@@ -107,6 +107,12 @@ public class Battle extends Thread {
 							innerProcess.send(String.valueOf(currentProcess.yFire));
 							currentProcess.fired = false;
 						}
+						
+						if(currentProcess.lost){
+							System.out.println("Surrender accepted :)");
+							innerProcess.send("$victory$");
+							currentProcess.lost = false;
+						}
 					}
 				}
 				fillProcesses();

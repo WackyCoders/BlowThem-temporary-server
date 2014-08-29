@@ -152,7 +152,7 @@ public class ConnectServer {
         int scores;
         int money;
         
-        protected boolean fired = false;
+        protected boolean fired = false, lost = false;
         protected Float X, Y, bitmapAngle, targetX, targetY;
         protected Float xFire, yFire;
         //Queue<Tank> tanks = new LinkedList<Tank>();
@@ -487,6 +487,9 @@ public class ConnectServer {
                 		send("$second$");
                 	}
 
+                } else if(line.equals("$lost$")){
+                	this.lost = true;
+                	
                 } else if (line.equals("$motion$")){
                 	if(battleStarted){
 	                	try{
