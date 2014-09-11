@@ -93,12 +93,18 @@ public class Battle extends Thread {
 					ConnectServer.UserProcessor innerProcess = queue.take();
 					if(currentProcess.userId != innerProcess.userId){
 						//System.out.println("X = " + currentProcess.X + " ; Y = " + currentProcess.Y);
-						innerProcess.send("$motion$");
-						innerProcess.send(String.valueOf(currentProcess.X));
-						innerProcess.send(String.valueOf(currentProcess.Y)); 
-						innerProcess.send(String.valueOf(currentProcess.bitmapAngle));
-						innerProcess.send(String.valueOf(currentProcess.targetX));
-						innerProcess.send(String.valueOf(currentProcess.targetY));
+						innerProcess.send("m");
+						//innerProcess.send(String.valueOf(currentProcess.X));
+						//innerProcess.send(String.valueOf(currentProcess.Y)); 
+						//innerProcess.send(String.valueOf(currentProcess.bitmapAngle));
+						//innerProcess.send(String.valueOf(currentProcess.targetX));
+						//innerProcess.send(String.valueOf(currentProcess.targetY));
+						
+						innerProcess.send(currentProcess.X);
+						innerProcess.send(currentProcess.Y); 
+						innerProcess.send(currentProcess.bitmapAngle);
+						innerProcess.send(currentProcess.targetX);
+						innerProcess.send(currentProcess.targetY);
 						
 						if(currentProcess.fired){
 							//System.out.println("FIRE!!!");

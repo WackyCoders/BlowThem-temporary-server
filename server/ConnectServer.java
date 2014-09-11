@@ -490,8 +490,9 @@ public class ConnectServer {
                 } else if(line.equals("$lost$")){
                 	this.lost = true;
                 	
-                } else if (line.equals("$motion$")){
+                } else if (line.equals("m")){
                 	if(battleStarted){
+                		
 	                	try{
 	                		this.X = inputStream.readFloat();
 	                		this.Y = inputStream.readFloat();
@@ -499,6 +500,7 @@ public class ConnectServer {
 	                		this.targetX = inputStream.readFloat();
 	                		this.targetY = inputStream.readFloat();
 	                		battle.startChannel(this);
+	                		//System.out.println(X +" " + Y+  " " +" " + bitmapAngle);
 	                	} catch(IOException e){
 	                		e.printStackTrace();
 	                	}
